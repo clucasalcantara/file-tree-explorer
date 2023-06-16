@@ -23,8 +23,10 @@ export default function Home(
     "styles",
     "public",
   ]);
+  const [actionedItems, setActionedItems] = useState<string[]>([]);
+  const [highlighted, setHighlighted] = useState<string>("");
 
-  const handleExpandAll = () => {
+  const handleExpandAll = useCallback(() => {
     const items = files.children?.reduce((acc: string[], file: DataNode) => {
       if (file.kind === "directory") {
         acc.push(file.name);
@@ -42,9 +44,15 @@ export default function Home(
     }, []) as string[];
 
     setExpandedItems(items);
-  };
+  }, [files.children]);
 
-  const resetExpandAll = useCallback(() => setExpandedItems([]), []);
+  const resetExpandAll = useCallback(
+    (name: string) => {
+      setExpandedItems(expandedItems.filter((item) => item === (name || ""))),
+        setActionedItems(actionedItems.filter((item) => item === (name || "")));
+    },
+    [expandedItems, actionedItems]
+  );
 
   return files.name ? (
     <main
@@ -54,13 +62,17 @@ export default function Home(
         <h1
           className="flex flex-row items-center gap-2 cursor-pointer"
           onClick={() =>
-            expandedItems.length < 4 ? handleExpandAll() : resetExpandAll()
+            expandedItems.length < 4 ? handleExpandAll() : resetExpandAll("")
           }
         >
           <AiFillFolderOpen />
           {files.name.toUpperCase()}
         </h1>
         <FileTree
+          actionedItems={actionedItems}
+          handleActionedItem={setActionedItems}
+          handleHilighted={setHighlighted}
+          highlighted={highlighted}
           files={files}
           resetExpandAll={resetExpandAll}
           expandedItems={expandedItems}

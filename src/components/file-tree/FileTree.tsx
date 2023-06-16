@@ -6,36 +6,43 @@ import { DataNode } from "./types";
 
 type FileTreeProps = {
   files: DataNode;
-  resetExpandAll?: () => void;
+  resetExpandAll?: (name: string) => void;
+  handleHilighted: (name: string) => void;
+  handleActionedItem: (name: string[]) => void;
   expandedItems?: string[];
+  actionedItems?: string[];
+  highlighted?: string;
 };
 
 export default function FileTree({
   files,
   resetExpandAll,
+  handleHilighted,
+  highlighted,
   expandedItems = [],
+  actionedItems = [],
+  handleActionedItem,
 }: FileTreeProps) {
   const { children } = files;
-  const [actionedItems, setActionedItems] = useState<string[]>([]);
-  const [highlighted, setHighlighted] = useState<string>("");
 
-  const handleExpand = (name: string) => {
-    resetExpandAll?.();
+  const handleExpand = (name: string, fromLeaf: boolean = true) => {
+    handleHilighted(name);
+
+    if (!fromLeaf) {
+      resetExpandAll?.(name);
+    }
 
     const expandedItems = [...actionedItems];
 
     if (expandedItems.includes(name)) {
-      setHighlighted("");
-
-      return setActionedItems(
+      return handleActionedItem(
         expandedItems.filter((item: string) => item !== name)
       );
     }
 
     expandedItems.push(name);
-    setHighlighted(name);
 
-    return setActionedItems(expandedItems);
+    return handleActionedItem(expandedItems);
   };
 
   return (
@@ -58,7 +65,7 @@ export default function FileTree({
                   onClick={(event: React.MouseEvent<HTMLElement>) => {
                     event.preventDefault();
 
-                    handleExpand(name);
+                    handleExpand(name, false);
                   }}
                 >
                   {isFolderOpen ? <AiFillFolderOpen /> : <AiFillFolder />}
@@ -66,6 +73,10 @@ export default function FileTree({
                 </h2>
                 {isFolderOpen && (
                   <FileTree
+                    actionedItems={actionedItems}
+                    handleActionedItem={handleActionedItem}
+                    highlighted={highlighted}
+                    handleHilighted={handleHilighted}
                     files={child}
                     expandedItems={expandedItems}
                     resetExpandAll={resetExpandAll}
