@@ -4,13 +4,19 @@ import { AiFillFolderOpen } from "react-icons/ai";
 import { FileTree } from "@/components/file-tree";
 import { useCallback, useState } from "react";
 
+import absoluteUrl from "next-absolute-url";
+
 import type { DataNode } from "@/components/file-tree/types";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home({
-  data: { files },
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home(
+  props: InferGetServerSidePropsType<typeof Home.getInitialProps>
+) {
+  const {
+    data: { files = [] as unknown as DataNode },
+  } = props || {};
+
   const [expandedItems, setExpandedItems] = useState<string[]>([
     "src",
     "components",
@@ -19,10 +25,11 @@ export default function Home({
   ]);
 
   const handleExpandAll = () => {
-    const items = files.children.reduce((acc: string[], file: DataNode) => {
+    const items = files.children?.reduce((acc: string[], file: DataNode) => {
       if (file.kind === "directory") {
         acc.push(file.name);
       }
+
       if (file.children) {
         file.children.forEach((child: DataNode) => {
           if (child.kind === "directory") {
@@ -32,14 +39,14 @@ export default function Home({
       }
 
       return acc;
-    }, []);
+    }, []) as string[];
 
     setExpandedItems(items);
   };
 
   const resetExpandAll = useCallback(() => setExpandedItems([]), []);
 
-  return (
+  return files.name ? (
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
     >
@@ -60,12 +67,14 @@ export default function Home({
         />
       </div>
     </main>
-  );
+  ) : null;
 }
 
-export async function getServerSideProps() {
-  const res = await fetch("http://localhost:3000/api/files");
+Home.getInitialProps = async ({ req }: any) => {
+  const { origin } = absoluteUrl(req);
+
+  const res = await fetch(`${origin}/api/files`);
   const data = await res.json();
 
-  return { props: { data } };
-}
+  return { data };
+};

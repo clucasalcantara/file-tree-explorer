@@ -91,8 +91,5 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<{ files: DataNode }>
 ) {
-  console.log("I was called");
-  console.log({ req });
-
   return res.status(200).json({ files: data });
 }
