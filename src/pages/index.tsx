@@ -56,8 +56,12 @@ export default function Home(
 
   return files.name ? (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+      className={`flex min-h-screen flex-col items-center gap-12 p-24 ${inter.className}`}
     >
+      <h1 className="text-3xl font-bold">React File Tree</h1>
+      <span className="text-gray-400">
+        Click on the root folder to expand/collapse all
+      </span>
       <div className="flex w-full px-16 py-6 bg-white bg-opacity-25 rounded-lg flex-col">
         <h1
           className="flex flex-row items-center gap-2 cursor-pointer"
